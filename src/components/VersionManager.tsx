@@ -1,21 +1,21 @@
 import { useState } from 'react';
 import { Box, Button, Typography, Card, CardContent, TextField, Checkbox, FormControlLabel, Alert, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@mui/material';
 import { Download, Delete, Info } from '@mui/icons-material';
-import { CMCLAPI } from '../services/shellApi';
+import { CMCLAPI, InstallOptions } from '../services/shellApi';
 
 export default function VersionManager() {
-  const [versions, setVersions] = useState([]);
+  const [versions, setVersions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [installVersion, setInstallVersion] = useState('');
-  const [installOptions, setInstallOptions] = useState({
+  const [installOptions, setInstallOptions] = useState<InstallOptions>({
     fabric: false,
     forge: false,
     optifine: false,
     quilt: false,
     select: false
   });
-  const [infoVersion, setInfoVersion] = useState(null);
+  const [infoVersion, setInfoVersion] = useState<string | null>(null);
   const [versionInfo, setVersionInfo] = useState('');
 
   const loadVersions = async () => {
@@ -24,7 +24,7 @@ export default function VersionManager() {
     try {
       const result = await CMCLAPI.listVersions();
       setVersions(result);
-    } catch (err) {
+    } catch {
       setError('Failed to load versions');
     }
     setIsLoading(false);
@@ -42,13 +42,13 @@ export default function VersionManager() {
       await CMCLAPI.installVersion(installVersion, installOptions);
       await loadVersions();
       setInstallVersion('');
-    } catch (err) {
+    } catch {
       setError('Failed to install version');
     }
     setIsLoading(false);
   };
 
-  const handleUninstall = async (version) => {
+  const handleUninstall = async (version: string) => {
     if (!window.confirm(`Are you sure you want to uninstall ${version}?`)) return;
 
     setIsLoading(true);
@@ -56,20 +56,20 @@ export default function VersionManager() {
     try {
       await CMCLAPI.uninstallVersion(version);
       await loadVersions();
-    } catch (err) {
+    } catch {
       setError('Failed to uninstall version');
     }
     setIsLoading(false);
   };
 
-  const handleGetInfo = async (version) => {
+  const handleGetInfo = async (version: string) => {
     setIsLoading(true);
     setError(null);
     try {
       const result = await CMCLAPI.getVersionInfo(version);
       setInfoVersion(version);
       setVersionInfo(result.stdout || result.stderr || 'No info available');
-    } catch (err) {
+    } catch {
       setError('Failed to get version info');
     }
     setIsLoading(false);
@@ -149,7 +149,7 @@ export default function VersionManager() {
           {infoVersion && (
             <Box sx={{ mt: 4, p: 3, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
               <Typography variant="h6">Info for {infoVersion}</Typography>
-              <pre sx={{ mt: 2, whiteSpace: 'pre-wrap' }}>{versionInfo}</pre>
+              <Box sx={{ mt: 2, whiteSpace: 'pre-wrap' }} component="pre">{versionInfo}</Box>
               <Button onClick={() => setInfoVersion(null)} sx={{ mt: 2 }}>Close</Button>
             </Box>
           )}

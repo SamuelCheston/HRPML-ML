@@ -1,28 +1,33 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress, Switch, FormControlLabel } from '@mui/material';
+import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress } from '@mui/material';
 import { Settings as SettingsIcon, Info, Refresh } from '@mui/icons-material';
-import { CMCLAPI, ShellAPI } from '../services/shellApi';
+import { CMCLAPI, ShellAPI, ShellResult } from '../services/shellApi';
 import { CMCL_CONFIG, LAUNCHER_CONFIG } from '../variables';
+
+interface MemorySettings {
+  maxMemory: string;
+  minMemory: string;
+}
 
 export default function SettingsView() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [config, setConfig] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [config, setConfig] = useState<string | null>(null);
   const [aboutInfo, setAboutInfo] = useState('');
-  const [memorySettings, setMemorySettings] = useState({
+  const [memorySettings, setMemorySettings] = useState<MemorySettings>({
     maxMemory: LAUNCHER_CONFIG.defaultMaxMemory,
     minMemory: LAUNCHER_CONFIG.defaultMinMemory
   });
   const [commandInput, setCommandInput] = useState('');
-  const [commandOutput, setCommandOutput] = useState(null);
+  const [commandOutput, setCommandOutput] = useState<ShellResult | null>(null);
 
   const loadConfig = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await CMCLAPI.getConfig();
+      const result: ShellResult = await CMCLAPI.getConfig();
       setConfig(result.stdout || '');
-    } catch (err) {
+    } catch {
       setError('Failed to load config');
     }
     setIsLoading(false);
@@ -34,7 +39,7 @@ export default function SettingsView() {
     try {
       await CMCLAPI.setConfig('maxMemory', memorySettings.maxMemory);
       await CMCLAPI.setConfig('minMemory', memorySettings.minMemory);
-    } catch (err) {
+    } catch {
       setError('Failed to set memory settings');
     }
     setIsLoading(false);
@@ -44,9 +49,9 @@ export default function SettingsView() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await CMCLAPI.checkForUpdates();
+      const result: ShellResult = await CMCLAPI.checkForUpdates();
       setAboutInfo(result.stdout || result.stderr || 'No update info available');
-    } catch (err) {
+    } catch {
       setError('Failed to check for updates');
     }
     setIsLoading(false);
@@ -56,9 +61,9 @@ export default function SettingsView() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await CMCLAPI.getAboutInfo();
+      const result: ShellResult = await CMCLAPI.getAboutInfo();
       setAboutInfo(result.stdout || 'No info available');
-    } catch (err) {
+    } catch {
       setError('Failed to get about info');
     }
     setIsLoading(false);
@@ -69,9 +74,9 @@ export default function SettingsView() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await ShellAPI.execute(commandInput);
+      const result: ShellResult = await ShellAPI.execute(commandInput);
       setCommandOutput(result);
-    } catch (err) {
+    } catch {
       setError('Failed to execute command');
     }
     setIsLoading(false);
@@ -206,9 +211,9 @@ export default function SettingsView() {
                     <Typography variant="subtitle2" sx={{ color: '#2e7d32' }}>
                       Standard Output:
                     </Typography>
-                    <pre sx={{ mt: 0.5, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
+                    <Box sx={{ mt: 0.5, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }} component="pre">
                       {commandOutput.stdout}
-                    </pre>
+                    </Box>
                   </Box>
                 )}
                 {commandOutput.stderr && (
@@ -216,9 +221,9 @@ export default function SettingsView() {
                     <Typography variant="subtitle2" sx={{ color: '#d32f2f' }}>
                       Standard Error:
                     </Typography>
-                    <pre sx={{ mt: 0.5, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
+                    <Box sx={{ mt: 0.5, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }} component="pre">
                       {commandOutput.stderr}
-                    </pre>
+                    </Box>
                   </Box>
                 )}
                 {commandOutput.error && (

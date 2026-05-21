@@ -3,11 +3,16 @@ import { Box, Button, Typography, Card, CardContent, CircularProgress, Alert } f
 import { PlayArrow, Refresh } from '@mui/icons-material';
 import { CMCLAPI } from '../services/shellApi';
 
-export default function HomeView({ selectedVersion, onVersionSelect }) {
+interface HomeViewProps {
+  selectedVersion: string | null;
+  onVersionSelect: (version: string) => void;
+}
+
+export default function HomeView({ selectedVersion, onVersionSelect }: HomeViewProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState(null);
-  const [versions, setVersions] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [versions, setVersions] = useState<string[]>([]);
 
   const loadVersions = async () => {
     setIsLoading(true);
@@ -15,7 +20,7 @@ export default function HomeView({ selectedVersion, onVersionSelect }) {
     try {
       const result = await CMCLAPI.listVersions();
       setVersions(result);
-    } catch (err) {
+    } catch {
       setError('Failed to load versions');
     }
     setIsLoading(false);
@@ -32,7 +37,7 @@ export default function HomeView({ selectedVersion, onVersionSelect }) {
     try {
       await CMCLAPI.selectVersion(selectedVersion);
       await CMCLAPI.startGame();
-    } catch (err) {
+    } catch {
       setError('Failed to start game');
     }
     setIsPlaying(false);

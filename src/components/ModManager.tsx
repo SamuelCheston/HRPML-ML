@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress } from '@mui/material';
-import { Layers, Search, Download } from '@mui/icons-material';
-import { CMCLAPI } from '../services/shellApi';
+import { Search, Download } from '@mui/icons-material';
+import { CMCLAPI, ShellResult } from '../services/shellApi';
 
 export default function ModManager() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [modUrl, setModUrl] = useState('');
   const [modName, setModName] = useState('');
   const [modInfo, setModInfo] = useState('');
@@ -24,7 +24,7 @@ export default function ModManager() {
     try {
       await CMCLAPI.installMod(modUrl);
       setModUrl('');
-    } catch (err) {
+    } catch {
       setError('Failed to install mod');
     }
     setIsLoading(false);
@@ -39,9 +39,9 @@ export default function ModManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await CMCLAPI.searchMod(modName);
+      const result: ShellResult = await CMCLAPI.searchMod(modName);
       setModInfo(result.stdout || result.stderr || 'No info found');
-    } catch (err) {
+    } catch {
       setError('Failed to search mod');
     }
     setIsLoading(false);
@@ -58,7 +58,7 @@ export default function ModManager() {
     try {
       await CMCLAPI.installModpack(modpackUrl);
       setModpackUrl('');
-    } catch (err) {
+    } catch {
       setError('Failed to install modpack');
     }
     setIsLoading(false);
@@ -73,9 +73,9 @@ export default function ModManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await CMCLAPI.searchModpack(modpackName);
+      const result: ShellResult = await CMCLAPI.searchModpack(modpackName);
       setModpackInfo(result.stdout || result.stderr || 'No info found');
-    } catch (err) {
+    } catch {
       setError('Failed to search modpack');
     }
     setIsLoading(false);
@@ -129,7 +129,7 @@ export default function ModManager() {
               {modInfo && (
                 <Box sx={{ mt: 2, p: 3, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
                   <Typography variant="subtitle1">Mod Info:</Typography>
-                  <pre sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>{modInfo}</pre>
+                  <Box sx={{ mt: 1, whiteSpace: 'pre-wrap' }} component="pre">{modInfo}</Box>
                   <Button onClick={() => setModInfo('')} sx={{ mt: 2 }}>Clear</Button>
                 </Box>
               )}
@@ -176,7 +176,7 @@ export default function ModManager() {
               {modpackInfo && (
                 <Box sx={{ mt: 2, p: 3, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
                   <Typography variant="subtitle1">Modpack Info:</Typography>
-                  <pre sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>{modpackInfo}</pre>
+                  <Box sx={{ mt: 1, whiteSpace: 'pre-wrap' }} component="pre">{modpackInfo}</Box>
                   <Button onClick={() => setModpackInfo('')} sx={{ mt: 2 }}>Clear</Button>
                 </Box>
               )}

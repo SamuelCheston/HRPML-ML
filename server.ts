@@ -1,19 +1,34 @@
-const express = require('express');
-const { exec } = require('child_process');
-const cors = require('cors');
+import express, { Express, Request, Response } from 'express';
+import { exec } from 'child_process';
+import cors from 'cors';
 
-const app = express();
-const PORT = 3000;
+const app: Express = express();
+const PORT: number = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/shell', (req, res) => {
+interface ShellRequest {
+  command: string;
+}
+
+interface ShellResponse {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  error: string | null;
+}
+
+app.post('/api/shell', (req: Request<{}, {}, ShellRequest>, res: Response<ShellResponse>) => {
   const { command } = req.body;
   
   if (!command) {
     return res.json({
       success: false,
+      stdout: '',
+      stderr: '',
+      exitCode: 1,
       error: 'No command provided'
     });
   }
@@ -23,7 +38,7 @@ app.post('/api/shell', (req, res) => {
       success: !error,
       stdout: stdout || '',
       stderr: stderr || '',
-      exitCode: error ? error.code : 0,
+      exitCode: error ? error.code || 1 : 0,
       error: error ? error.message : null
     });
   });

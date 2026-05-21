@@ -2,10 +2,30 @@ import { CMCL_CONFIG } from '../variables';
 
 const { shellApiUrl, cmclPath } = CMCL_CONFIG;
 
+export interface ShellResult {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  error: string | null;
+}
+
+export interface InstallOptions {
+  fabric?: boolean;
+  fabricVersion?: string;
+  forge?: boolean;
+  forgeVersion?: string;
+  optifine?: boolean;
+  optifineVersion?: string;
+  quilt?: boolean;
+  quiltVersion?: string;
+  select?: boolean;
+}
+
 export const ShellAPI = {
-  async execute(command) {
+  async execute(command: string): Promise<ShellResult> {
     if (!command || typeof command !== 'string') {
-      return { success: false, error: 'Invalid command' };
+      return { success: false, stdout: '', stderr: '', exitCode: 1, error: 'Invalid command' };
     }
 
     try {
@@ -15,6 +35,9 @@ export const ShellAPI = {
         const text = await response.text();
         return {
           success: false,
+          stdout: '',
+          stderr: '',
+          exitCode: response.status,
           error: `HTTP ${response.status}: ${text || response.statusText}`,
         };
       }
@@ -23,6 +46,9 @@ export const ShellAPI = {
       if (!responseText) {
         return {
           success: false,
+          stdout: '',
+          stderr: '',
+          exitCode: 1,
           error: 'Empty response from server',
         };
       }
@@ -38,14 +64,17 @@ export const ShellAPI = {
     } catch (error) {
       return {
         success: false,
-        error: error.message || 'Failed to execute command',
+        stdout: '',
+        stderr: '',
+        exitCode: 1,
+        error: error instanceof Error ? error.message : 'Failed to execute command',
       };
     }
   },
 };
 
 export const CMCLAPI = {
-  async listVersions() {
+  async listVersions(): Promise<string[]> {
     const command = `${cmclPath} --list`;
     const result = await ShellAPI.execute(command);
     if (result.success) {
@@ -55,17 +84,17 @@ export const CMCLAPI = {
     return [];
   },
 
-  async selectVersion(version) {
+  async selectVersion(version: string): Promise<ShellResult> {
     const command = `${cmclPath} --select=${version}`;
     return await ShellAPI.execute(command);
   },
 
-  async startGame(version = null) {
+  async startGame(version?: string): Promise<ShellResult> {
     const command = version ? `${cmclPath} ${version}` : cmclPath;
     return await ShellAPI.execute(command);
   },
 
-  async installVersion(version, options = {}) {
+  async installVersion(version: string, options: InstallOptions = {}): Promise<ShellResult> {
     let command = `${cmclPath} install ${version}`;
     
     if (options.fabric) {
@@ -87,17 +116,17 @@ export const CMCLAPI = {
     return await ShellAPI.execute(command);
   },
 
-  async uninstallVersion(version) {
+  async uninstallVersion(version: string): Promise<ShellResult> {
     const command = `${cmclPath} version ${version} --delete`;
     return await ShellAPI.execute(command);
   },
 
-  async getVersionInfo(version) {
+  async getVersionInfo(version: string): Promise<ShellResult> {
     const command = `${cmclPath} version ${version} --info`;
     return await ShellAPI.execute(command);
   },
 
-  async listAccounts() {
+  async listAccounts(): Promise<string[]> {
     const command = `${cmclPath} account --list`;
     const result = await ShellAPI.execute(command);
     if (result.success) {
@@ -107,57 +136,57 @@ export const CMCLAPI = {
     return [];
   },
 
-  async selectAccount(index) {
+  async selectAccount(index: number): Promise<ShellResult> {
     const command = `${cmclPath} account --select=${index}`;
     return await ShellAPI.execute(command);
   },
 
-  async loginOffline(username) {
+  async loginOffline(username: string): Promise<ShellResult> {
     const command = `${cmclPath} account --login=offline --name=${username}`;
     return await ShellAPI.execute(command);
   },
 
-  async loginMicrosoft() {
+  async loginMicrosoft(): Promise<ShellResult> {
     const command = `${cmclPath} account --login=microsoft`;
     return await ShellAPI.execute(command);
   },
 
-  async getConfig(key = null) {
+  async getConfig(key?: string): Promise<ShellResult> {
     const command = key ? `${cmclPath} config ${key}` : `${cmclPath} config -a`;
     return await ShellAPI.execute(command);
   },
 
-  async setConfig(key, value) {
+  async setConfig(key: string, value: string): Promise<ShellResult> {
     const command = `${cmclPath} config ${key} ${value}`;
     return await ShellAPI.execute(command);
   },
 
-  async installMod(url) {
+  async installMod(url: string): Promise<ShellResult> {
     const command = `${cmclPath} mod --url=${url}`;
     return await ShellAPI.execute(command);
   },
 
-  async searchMod(name) {
+  async searchMod(name: string): Promise<ShellResult> {
     const command = `${cmclPath} mod --info --name=${name}`;
     return await ShellAPI.execute(command);
   },
 
-  async installModpack(url) {
+  async installModpack(url: string): Promise<ShellResult> {
     const command = `${cmclPath} modpack --url=${url}`;
     return await ShellAPI.execute(command);
   },
 
-  async searchModpack(name) {
+  async searchModpack(name: string): Promise<ShellResult> {
     const command = `${cmclPath} modpack --info --name=${name}`;
     return await ShellAPI.execute(command);
   },
 
-  async checkForUpdates() {
+  async checkForUpdates(): Promise<ShellResult> {
     const command = `${cmclPath} --check-for-updates`;
     return await ShellAPI.execute(command);
   },
 
-  async getAboutInfo() {
+  async getAboutInfo(): Promise<ShellResult> {
     const command = `${cmclPath} --about`;
     return await ShellAPI.execute(command);
   }

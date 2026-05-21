@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import { Gamepad, Home, Settings, Group, Layers, Menu } from '@mui/icons-material';
 import HomeView from './components/HomeView';
 import VersionManager from './components/VersionManager';
@@ -9,22 +9,28 @@ import SettingsView from './components/SettingsView';
 
 const drawerWidth = 240;
 
+interface NavItem {
+  id: string;
+  label: string;
+  icon: typeof Home;
+}
+
+const navItems: NavItem[] = [
+  { id: 'home', label: 'Play', icon: Home },
+  { id: 'versions', label: 'Versions', icon: Gamepad },
+  { id: 'accounts', label: 'Accounts', icon: Group },
+  { id: 'mods', label: 'Mods', icon: Layers },
+  { id: 'settings', label: 'Settings', icon: Settings },
+];
+
 export default function App() {
-  const [selectedView, setSelectedView] = useState('home');
-  const [selectedVersion, setSelectedVersion] = useState(null);
+  const [selectedView, setSelectedView] = useState<string>('home');
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-
-  const navItems = [
-    { id: 'home', label: 'Play', icon: Home },
-    { id: 'versions', label: 'Versions', icon: Gamepad },
-    { id: 'accounts', label: 'Accounts', icon: Group },
-    { id: 'mods', label: 'Mods', icon: Layers },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
 
   const renderView = () => {
     switch (selectedView) {
@@ -90,11 +96,13 @@ export default function App() {
             <Typography variant="h6" sx={{ my: 2 }}>Minecraft Launcher</Typography>
             <List>
               {navItems.map((item) => (
-                <ListItem button key={item.id} selected={selectedView === item.id}>
-                  <ListItemIcon>
-                    <item.icon />
-                  </ListItemIcon>
-                  <ListItemText primary={item.label} />
+                <ListItem key={item.id}>
+                  <ListItemButton selected={selectedView === item.id}>
+                    <ListItemIcon>
+                      <item.icon />
+                    </ListItemIcon>
+                    <ListItemText primary={item.label} />
+                  </ListItemButton>
                 </ListItem>
               ))}
             </List>
@@ -114,17 +122,17 @@ export default function App() {
           </Box>
           <List>
             {navItems.map((item) => (
-              <ListItem 
-                button 
-                key={item.id} 
-                selected={selectedView === item.id}
-                onClick={() => setSelectedView(item.id)}
-                sx={{ '&.Mui-selected': { backgroundColor: '#4CAF50' } }}
-              >
-                <ListItemIcon sx={{ color: selectedView === item.id ? 'white' : '#9ca3af' }}>
-                  <item.icon />
-                </ListItemIcon>
-                <ListItemText primary={item.label} sx={{ color: selectedView === item.id ? 'white' : '#d1d5db' }} />
+              <ListItem key={item.id}>
+                <ListItemButton
+                  selected={selectedView === item.id}
+                  onClick={() => setSelectedView(item.id)}
+                  sx={{ '&.Mui-selected': { backgroundColor: '#4CAF50' } }}
+                >
+                  <ListItemIcon sx={{ color: selectedView === item.id ? 'white' : '#9ca3af' }}>
+                    <item.icon />
+                  </ListItemIcon>
+                  <ListItemText primary={item.label} sx={{ color: selectedView === item.id ? 'white' : '#d1d5db' }} />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>

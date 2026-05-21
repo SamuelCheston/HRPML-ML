@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@mui/material';
-import { Person, Login, Refresh, Logout } from '@mui/icons-material';
+import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress, List, ListItem, ListItemButton, ListItemText, ListItemSecondaryAction } from '@mui/material';
+import { Person, Login, Refresh } from '@mui/icons-material';
 import { CMCLAPI } from '../services/shellApi';
 
 export default function AccountManager() {
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [offlineName, setOfflineName] = useState('');
-  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState<number | null>(null);
 
   const loadAccounts = async () => {
     setIsLoading(true);
@@ -16,7 +16,7 @@ export default function AccountManager() {
     try {
       const result = await CMCLAPI.listAccounts();
       setAccounts(result);
-    } catch (err) {
+    } catch {
       setError('Failed to load accounts');
     }
     setIsLoading(false);
@@ -34,7 +34,7 @@ export default function AccountManager() {
       await CMCLAPI.loginOffline(offlineName);
       await loadAccounts();
       setOfflineName('');
-    } catch (err) {
+    } catch {
       setError('Failed to create offline account');
     }
     setIsLoading(false);
@@ -46,19 +46,19 @@ export default function AccountManager() {
     try {
       await CMCLAPI.loginMicrosoft();
       await loadAccounts();
-    } catch (err) {
+    } catch {
       setError('Failed to login with Microsoft');
     }
     setIsLoading(false);
   };
 
-  const handleSelectAccount = async (index) => {
+  const handleSelectAccount = async (index: number) => {
     setIsLoading(true);
     setError(null);
     try {
       await CMCLAPI.selectAccount(index + 1);
       setSelectedAccount(index);
-    } catch (err) {
+    } catch {
       setError('Failed to select account');
     }
     setIsLoading(false);
@@ -115,18 +115,15 @@ export default function AccountManager() {
             </Button>
             <List>
               {accounts.map((account, index) => (
-                <ListItem 
-                  key={index} 
-                  button 
-                  onClick={() => handleSelectAccount(index)}
-                  selected={selectedAccount === index}
-                >
-                  <ListItemText primary={account} />
-                  <ListItemSecondaryAction>
-                    {selectedAccount === index && (
-                      <Typography variant="body2" color="primary">Selected</Typography>
-                    )}
-                  </ListItemSecondaryAction>
+                <ListItem key={index}>
+                  <ListItemButton onClick={() => handleSelectAccount(index)} selected={selectedAccount === index}>
+                    <ListItemText primary={account} />
+                    <ListItemSecondaryAction>
+                      {selectedAccount === index && (
+                        <Typography variant="body2" color="primary">Selected</Typography>
+                      )}
+                    </ListItemSecondaryAction>
+                  </ListItemButton>
                 </ListItem>
               ))}
             </List>
