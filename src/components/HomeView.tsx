@@ -48,10 +48,10 @@ export default function HomeView({ selectedVersion, onVersionSelect }: HomeViewP
       <Card>
         <CardContent sx={{ textAlign: 'center' }}>
           <Typography variant="h3" sx={{ mb: 2, fontWeight: 'bold', color: '#4CAF50' }}>
-            Minecraft Launcher
+            Samuel Client
           </Typography>
           <Typography variant="body1" sx={{ mb: 4 }}>
-            Powered by CMCL
+            test
           </Typography>
 
           {error && (

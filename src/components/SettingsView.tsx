@@ -204,7 +204,6 @@ export default function SettingsView() {
               <Box sx={{ p: 3, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Status: {commandOutput.success ? 'Success' : 'Error'}
-                  {commandOutput.exitCode !== undefined && ` (Exit code: ${commandOutput.exitCode})`}
                 </Typography>
                 {commandOutput.stdout && (
                   <Box sx={{ mb: 2 }}>

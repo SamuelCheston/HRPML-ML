@@ -6,7 +6,6 @@ export interface ShellResult {
   success: boolean;
   stdout: string;
   stderr: string;
-  exitCode: number;
   error: string | null;
 }
 
@@ -25,49 +24,51 @@ export interface InstallOptions {
 export const ShellAPI = {
   async execute(command: string): Promise<ShellResult> {
     if (!command || typeof command !== 'string') {
-      return { success: false, stdout: '', stderr: '', exitCode: 1, error: 'Invalid command' };
+      return { success: false, stdout: '', stderr: '', error: 'Invalid command' };
     }
 
     try {
-      const response = await fetch(`${shellApiUrl}/shell.html?cmd=${encodeURIComponent(command)}`);
-      
+      const response = await fetch(`${shellApiUrl}/api/execute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command }),
+      });
+
       if (!response.ok) {
-        const text = await response.text();
-        return {
-          success: false,
-          stdout: '',
-          stderr: '',
-          exitCode: response.status,
-          error: `HTTP ${response.status}: ${text || response.statusText}`,
-        };
+        try {
+          const json = await response.json();
+          return {
+            success: false,
+            stdout: '',
+            stderr: '',
+            error: json.error || `HTTP ${response.status}: ${response.statusText}`,
+          };
+        } catch {
+          const text = await response.text();
+          return {
+            success: false,
+            stdout: '',
+            stderr: '',
+            error: `HTTP ${response.status}: ${text || response.statusText}`,
+          };
+        }
       }
 
-      const responseText = await response.text();
-      if (!responseText) {
-        return {
-          success: false,
-          stdout: '',
-          stderr: '',
-          exitCode: 1,
-          error: 'Empty response from server',
-        };
-      }
-
-      const result = JSON.parse(responseText);
+      const result = await response.json();
       return {
-        success: result.exitCode === 0,
+        success: result.success || false,
         stdout: result.stdout || '',
         stderr: result.stderr || '',
-        exitCode: result.exitCode || 0,
         error: result.error || null,
       };
-    } catch (error) {
+    } catch (err) {
       return {
         success: false,
         stdout: '',
         stderr: '',
-        exitCode: 1,
-        error: error instanceof Error ? error.message : 'Failed to execute command',
+        error: err instanceof Error ? err.message : 'Failed to execute command',
       };
     }
   },
