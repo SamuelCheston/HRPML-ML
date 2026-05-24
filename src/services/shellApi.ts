@@ -152,6 +152,11 @@ export const CMCLAPI = {
     return await ShellAPI.execute(command);
   },
 
+  async loginAuthlib(address: string): Promise<ShellResult> {
+    const command = `${cmclPath} account --login=authlib --address=${address}`;
+    return await ShellAPI.execute(command);
+  },
+
   async getConfig(key?: string): Promise<ShellResult> {
     const command = key ? `${cmclPath} config ${key}` : `${cmclPath} config -a`;
     return await ShellAPI.execute(command);

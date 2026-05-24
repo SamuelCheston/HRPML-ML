@@ -1,14 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress, List, ListItem, ListItemButton, ListItemText, ListItemSecondaryAction } from '@mui/material';
 import { Person, Login, Refresh } from '@mui/icons-material';
 import { CMCLAPI } from '../services/shellApi';
+import { ConfigAPI } from '../services/configApi';
 
 export default function AccountManager() {
   const [accounts, setAccounts] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [offlineName, setOfflineName] = useState('');
+  const [authlibAddress, setAuthlibAddress] = useState('');
   const [selectedAccount, setSelectedAccount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      const savedAddress = await ConfigAPI.getConfig('authlibAddress');
+      if (savedAddress) {
+        setAuthlibAddress(savedAddress as string);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const loadAccounts = async () => {
     setIsLoading(true);
@@ -48,6 +60,25 @@ export default function AccountManager() {
       await loadAccounts();
     } catch {
       setError('Failed to login with Microsoft');
+    }
+    setIsLoading(false);
+  };
+
+  const handleLoginAuthlib = async () => {
+    if (!authlibAddress.trim()) {
+      setError('Please enter a server address');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      await CMCLAPI.loginAuthlib(authlibAddress);
+      await ConfigAPI.setConfig('authlibAddress', authlibAddress);
+      await loadAccounts();
+      setAuthlibAddress('');
+    } catch {
+      setError('Failed to login with Yggdrasil API');
     }
     setIsLoading(false);
   };
@@ -103,6 +134,26 @@ export default function AccountManager() {
                 disabled={isLoading}
               >
                 {isLoading ? <CircularProgress size={20} /> : 'Login with Microsoft'}
+              </Button>
+            </Box>
+
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>Yggdrasil API (Authlib)</Typography>
+              <TextField
+                label="Server Address"
+                value={authlibAddress}
+                onChange={(e) => setAuthlibAddress(e.target.value)}
+                placeholder="e.g., 127.0.0.1"
+                sx={{ mr: 2, width: 200 }}
+              />
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<Login />}
+                onClick={handleLoginAuthlib}
+                disabled={isLoading}
+              >
+                {isLoading ? <CircularProgress size={20} /> : 'Login with Yggdrasil'}
               </Button>
             </Box>
           </Box>

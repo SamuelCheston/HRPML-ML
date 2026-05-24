@@ -5,7 +5,9 @@ import HomeView from './components/HomeView';
 import VersionManager from './components/VersionManager';
 import AccountManager from './components/AccountManager';
 import ModManager from './components/ModManager';
+import AboutView from './components/AboutView';
 import SettingsView from './components/SettingsView';
+import { InfoOutlined } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -21,6 +23,7 @@ const navItems: NavItem[] = [
   { id: 'accounts', label: 'Accounts', icon: Group },
   { id: 'mods', label: 'Mods', icon: Layers },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'about', label: 'About', icon: InfoOutlined },
 ];
 
 export default function App() {
@@ -44,6 +47,8 @@ export default function App() {
         return <ModManager />;
       case 'settings':
         return <SettingsView />;
+      case 'about':
+        return <AboutView />;
       default:
         return <HomeView selectedVersion={selectedVersion} onVersionSelect={setSelectedVersion} />;
     }
@@ -70,7 +75,7 @@ export default function App() {
             <Menu />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Minecraft Launcher
+            Samuel Client
           </Typography>
         </Toolbar>
       </AppBar>
@@ -118,7 +123,7 @@ export default function App() {
           open
         >
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="h6" sx={{ color: 'white' }}>Minecraft Launcher</Typography>
+            <Typography variant="h6" sx={{ color: 'white' }}>Samuel Client</Typography>
           </Box>
           <List>
             {navItems.map((item) => (

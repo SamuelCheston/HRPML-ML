@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, Typography, Card, CardContent, TextField, Alert, CircularProgress } from '@mui/material';
 import { Settings as SettingsIcon, Info, Refresh } from '@mui/icons-material';
 import { CMCLAPI, ShellAPI, ShellResult } from '../services/shellApi';
 import { CMCL_CONFIG, LAUNCHER_CONFIG } from '../variables';
+import { ConfigAPI } from '../services/configApi';
 
 interface MemorySettings {
   maxMemory: string;
@@ -20,6 +21,18 @@ export default function SettingsView() {
   });
   const [commandInput, setCommandInput] = useState('');
   const [commandOutput, setCommandOutput] = useState<ShellResult | null>(null);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      const savedMaxMemory = await ConfigAPI.getConfig('maxMemory');
+      const savedMinMemory = await ConfigAPI.getConfig('minMemory');
+      setMemorySettings({
+        maxMemory: (savedMaxMemory as string) || LAUNCHER_CONFIG.defaultMaxMemory,
+        minMemory: (savedMinMemory as string) || LAUNCHER_CONFIG.defaultMinMemory
+      });
+    };
+    loadConfig();
+  }, []);
 
   const loadConfig = async () => {
     setIsLoading(true);
@@ -39,6 +52,8 @@ export default function SettingsView() {
     try {
       await CMCLAPI.setConfig('maxMemory', memorySettings.maxMemory);
       await CMCLAPI.setConfig('minMemory', memorySettings.minMemory);
+      await ConfigAPI.setConfig('maxMemory', memorySettings.maxMemory);
+      await ConfigAPI.setConfig('minMemory', memorySettings.minMemory);
     } catch {
       setError('Failed to set memory settings');
     }
