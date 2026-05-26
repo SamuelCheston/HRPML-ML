@@ -1,12 +1,20 @@
 import { CMCL_CONFIG } from '../variables';
 
-const { shellApiUrl, cmclPath } = CMCL_CONFIG;
+const { shellApiUrl, cmclPath, cmclJsonPath } = CMCL_CONFIG;
 
 export interface ShellResult {
   success: boolean;
   stdout: string;
   stderr: string;
   error: string | null;
+}
+
+export interface JFSResult<T = unknown> {
+  success: boolean;
+  data?: T;
+  path?: string;
+  message?: string;
+  error?: string;
 }
 
 export interface InstallOptions {
@@ -196,4 +204,382 @@ export const CMCLAPI = {
     const command = `${cmclPath} --about`;
     return await ShellAPI.execute(command);
   }
+};
+
+export const JFSAPI = {
+  async readFile(filePath: string): Promise<JFSResult> {
+    try {
+      const response = await fetch(`${shellApiUrl}/api/jfs/?file=${encodeURIComponent(filePath)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const json = await response.json();
+        return { success: false, error: json.error || `HTTP ${response.status}` };
+      }
+
+      const result = await response.json();
+      return {
+        success: result.success,
+        data: result.data,
+        path: result.path,
+        error: result.error,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to read file',
+      };
+    }
+  },
+
+  async writeFile(filePath: string, content: unknown): Promise<JFSResult> {
+    try {
+      const response = await fetch(`${shellApiUrl}/api/jfs/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file: filePath, content }),
+      });
+
+      if (!response.ok) {
+        const json = await response.json();
+        return { success: false, error: json.error || `HTTP ${response.status}` };
+      }
+
+      const result = await response.json();
+      return {
+        success: result.success,
+        message: result.message,
+        path: result.path,
+        error: result.error,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to write file',
+      };
+    }
+  },
+
+  async modifyFile(filePath: string, modify: Record<string, unknown>): Promise<JFSResult> {
+    try {
+      const response = await fetch(`${shellApiUrl}/api/jfs/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file: filePath, modify }),
+      });
+
+      if (!response.ok) {
+        const json = await response.json();
+        return { success: false, error: json.error || `HTTP ${response.status}` };
+      }
+
+      const result = await response.json();
+      return {
+        success: result.success,
+        message: result.message,
+        path: result.path,
+        data: result.data,
+        error: result.error,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to modify file',
+      };
+    }
+  },
+
+  async deleteFile(filePath: string): Promise<JFSResult> {
+    try {
+      const response = await fetch(`${shellApiUrl}/api/jfs/?file=${encodeURIComponent(filePath)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const json = await response.json();
+        return { success: false, error: json.error || `HTTP ${response.status}` };
+      }
+
+      const result = await response.json();
+      return {
+        success: result.success,
+        message: result.message,
+        path: result.path,
+        error: result.error,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to delete file',
+      };
+    }
+  },
+};
+
+export const RelayAPI = {
+  async get(url: string): Promise<Response> {
+    return await fetch(`${shellApiUrl}/api/relay`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+    });
+  },
+
+  async post(url: string, data?: unknown): Promise<Response> {
+    const body: Record<string, unknown> = { url };
+    if (data !== undefined) {
+      body.data = data;
+    }
+
+    return await fetch(`${shellApiUrl}/api/relay`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+  },
+};
+
+export const CMCLConfigAPI = {
+  async getCmclConfig(): Promise<JFSResult> {
+    return await JFSAPI.readFile(cmclJsonPath);
+  },
+
+  async saveCmclConfig(config: unknown): Promise<JFSResult> {
+    return await JFSAPI.writeFile(cmclJsonPath, config);
+  },
+
+  async updateCmclAccounts(accounts: unknown[]): Promise<JFSResult> {
+    return await JFSAPI.modifyFile(cmclJsonPath, { accounts });
+  },
+};
+
+export interface HRPAuthLoginResponse {
+  success: boolean;
+  accessToken: string;
+  clientToken: string;
+  availableProfiles: Array<{
+    id: string;
+    name: string;
+    model?: string;
+  }>;
+  selectedProfile: {
+    id: string;
+    name: string;
+    model?: string;
+  };
+  user?: {
+    id: string;
+    email: string;
+    username: string;
+    properties: unknown[];
+  };
+  error?: string;
+  errorMessage?: string;
+}
+
+export interface HRPAuthAccount {
+  loginMethod: number;
+  playerName: string;
+  clientToken: string;
+  serverName: string;
+  accessToken: string;
+  metadataEncoded: string;
+  uuid: string;
+  selected: boolean;
+  url: string;
+  username: string;
+}
+
+export const HRPAuthAPI = {
+  async login(
+    baseUrl: string,
+    email: string,
+    password: string
+  ): Promise<HRPAuthLoginResponse> {
+    try {
+      const response = await RelayAPI.post(`${baseUrl}/authserver/authenticate`, {
+        username: email,
+        password: password,
+        agent: {
+          name: 'Minecraft',
+          version: 1,
+        },
+        clientToken: Array.from({ length: 32 }, () =>
+          Math.floor(Math.random() * 16).toString(16)
+        ).join(''),
+        requestUser: true,
+      });
+
+      if (!response.ok) {
+        const json = await response.json();
+        return {
+          success: false,
+          accessToken: '',
+          clientToken: '',
+          availableProfiles: [],
+          selectedProfile: { id: '', name: '' },
+          error: json.error,
+          errorMessage: json.errorMessage,
+        };
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        accessToken: result.accessToken,
+        clientToken: result.clientToken,
+        availableProfiles: result.availableProfiles || [],
+        selectedProfile: result.selectedProfile || { id: '', name: '' },
+        user: result.user,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        accessToken: '',
+        clientToken: '',
+        availableProfiles: [],
+        selectedProfile: { id: '', name: '' },
+        error: 'NetworkError',
+        errorMessage: err instanceof Error ? err.message : 'Failed to login',
+      };
+    }
+  },
+
+  async getServerMetadata(baseUrl: string): Promise<{
+    success: boolean;
+    meta?: unknown;
+    skinDomains?: string[];
+    signaturePublickey?: string;
+    error?: string;
+  }> {
+    try {
+      const response = await RelayAPI.get(baseUrl);
+
+      if (!response.ok) {
+        return { success: false, error: `HTTP ${response.status}` };
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        meta: result.meta,
+        skinDomains: result.skinDomains,
+        signaturePublickey: result.signaturePublickey,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to fetch metadata',
+      };
+    }
+  },
+
+  generateMetadataEncoded(
+    serverMetadata: unknown,
+    serverName: string
+  ): string {
+    const metadata = {
+      meta: {
+        serverName: serverName,
+        ...(serverMetadata as Record<string, unknown>),
+      },
+      skinDomains: [],
+      signaturePublickey: '',
+    };
+    return Buffer.from(JSON.stringify(metadata)).toString('base64');
+  },
+
+  async createAccountFromLogin(
+    loginResponse: HRPAuthLoginResponse,
+    serverUrl: string,
+    serverName: string = 'HRPAuth'
+  ): Promise<HRPAuthAccount> {
+    const profile = loginResponse.selectedProfile || loginResponse.availableProfiles[0];
+    const user = loginResponse.user;
+
+    return {
+      loginMethod: 1,
+      playerName: profile?.name || '',
+      clientToken: loginResponse.clientToken,
+      serverName: serverName,
+      accessToken: loginResponse.accessToken,
+      metadataEncoded: this.generateMetadataEncoded({}, serverName),
+      uuid: profile?.id || user?.id || '',
+      selected: true,
+      url: serverUrl,
+      username: user?.email || user?.username || '',
+    };
+  },
+
+  async loginAndSave(
+    serverUrl: string,
+    email: string,
+    password: string,
+    serverName: string = 'HRPAuth'
+  ): Promise<{
+    success: boolean;
+    message: string;
+    account?: HRPAuthAccount;
+    error?: string;
+  }> {
+    const loginResponse = await this.login(serverUrl, email, password);
+
+    if (!loginResponse.success) {
+      return {
+        success: false,
+        message: loginResponse.errorMessage || 'Login failed',
+        error: loginResponse.error,
+      };
+    }
+
+    const account = await this.createAccountFromLogin(
+      loginResponse,
+      serverUrl,
+      serverName
+    );
+
+    const configResult = await CMCLConfigAPI.getCmclConfig();
+    let currentAccounts: HRPAuthAccount[] = [];
+
+    if (configResult.success && configResult.data) {
+      const config = configResult.data as Record<string, unknown>;
+      currentAccounts = (config.accounts as HRPAuthAccount[]) || [];
+    }
+
+    currentAccounts = currentAccounts.filter(
+      acc => acc.uuid !== account.uuid
+    );
+    currentAccounts.push(account);
+
+    const updateResult = await CMCLConfigAPI.updateCmclAccounts(currentAccounts);
+
+    if (!updateResult.success) {
+      return {
+        success: false,
+        message: 'Failed to save account',
+        error: updateResult.error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Login successful',
+      account,
+    };
+  },
 };

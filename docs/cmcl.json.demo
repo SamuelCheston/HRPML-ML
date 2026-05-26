@@ -1,0 +1,24 @@
+{
+  "exitWithMinecraft": true,
+  "selectedVersion": "1.12.2",
+  "javaPath": "/usr/lib/jvm/java-25-openjdk/bin/java",
+  "windowSizeWidth": 854,
+  "windowSizeHeight": 480,
+  "language": "en",
+  "downloadSource": 0,
+  "accounts": [{
+    "loginMethod": 1,
+    "playerName": "lin8",
+    "clientToken": "196b67a9c5c74d75a27dff73ba358781",
+    "serverName": "HRPAuth",
+    "accessToken": "1fe8459ced53abfac58f609d15044f144332f6c9ca602dc6ac9b8243cfe51dd0",
+    "metadataEncoded": "eyJtZXRhIjp7InNlcnZlck5hbWUiOiJIUlBBdXRoIiwiaW1wbGVtZW50YXRpb25OYW1lIjoiSFJQQXV0aCB6Z2dkcmFzaWwtYXBpIHNlcnZpY2UiLCJpbXBsZW1lbnRhdGlvblZlcnNpb24iOiI1NTI2IiwibGlua3MiOnsiaG9tZXBhZ2UiOiJodHRwczpcL1wvYXV0aC5zYW11ZWxjaGVzdG9uLmNvbVwvIiwicmVnaXN0ZXIiOiJodHRwczpcL1wvYXV0aC5zYW11ZWxjaGVzdG9uLmNvbVwvcmVnaXN0ZXIifSwiZmVhdHVyZS5ub25fZW1haWxfbG9naW4iOnRydWUsImZlYXR1cmUubGVnYWN5X3NraW5fYXBpIjp0cnVlLCJmZWF0dXJlLm5vX21vamFuZ19uYW1lc3BhY2UiOmZhbHNlLCJmZWF0dXJlLmVuYWJsZV9tb2phbmdfYW50aV9mZWF0dXJlcyI6ZmFsc2UsImZlYXR1cmUuZW5hYmxlX3Byb2ZpbGVfa2V5IjpmYWxzZSwiZmVhdHVyZS51c2VybmFtZV9jaGVjayI6dHJ1ZX0sInNraW5Eb21haW5zIjpbImhycGF1dGguc2FtdWVsY2hlc3Rvbi5jb20iLCIuaHJwYXV0aC5zYW11ZWxjaGVzdG9uLmNvbSJdLCJzaWduYXR1cmVQdWJsaWNrZXkiOiItLS0tLUJFR0lOIFBVQkxJQyBLRVktLS0tLVxuTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUE1M1d2NFlka1poRjA3N2orTGVnYlxuRzVjT0tDM1wvWXowNFNtRFJRdkc5eXpsWHczdkVLQmpyNmZrK2lrMG9QY1RnUExZVmxVTzkrK1QwVFc5MVJJZTFcbit3UnFqUkZlUGdIaFl2am9NZWlZUGdpcUdnQkVUbVhPRTY5VlNncERBWGpTWTh0SzZFMmx4SFJDNWZvbjZVY3lcbkZzM0JBOHc2dVZ5QVpGaURxaXBsREE1RndVdkl1XC9vRllwcWRNd0hSdXU0Z1JweGJOSFBYb20zaURZSWwyZjczXG5IU3ZoaXBjdU5YeHRXNllTbGlPTWlrdTNJKzhQQWNKUm40Y210ZDdRNG5LOGxLWUV0MVVRS05XXC9SaDA5cCtCVVxuZExxRnpja29NY3BuVGZJN1lFNm0wTmJcL0l3bHhJMXNhU1NVVnhaOHVjaXJMb0F1SzE5RXFpNnR1WnF0V1RcL1UyXG5VUUlEQVFBQlxuLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tXG4ifQ==",
+    "uuid": "25da583dc07b4d59a9e7f60bf213f233",
+    "selected": true,
+    "url": "https://backend.auth.samuelcheston.com/",
+    "username": "me@samuelchest.com"
+  }],
+  "checkAccountBeforeStart": true,
+  "printStartupInfo": true,
+  "maxMemory": 3952
+}
